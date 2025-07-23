@@ -28,8 +28,11 @@ static void onButtonSingleClickCb2(void *button_handle, void *usr_data) { prvPre
 static void onButtonDoubleClickCb2(void *button_handle, void *usr_data) { ecPress = true; }
 static void onButtonHoldCb2(void *button_handle, void *usr_data) { ecPress = true; }
 
+static void onButtonSingleClickCb3(void *button_handle, void *usr_data) { slPress = true; }
+
 Button *btn1;
 Button *btn2;
+Button *btn3; //SEL Button
 
 #if defined(T_DISPLAY_S3)
 #include <esp_adc_cal.h>
@@ -77,7 +80,17 @@ void _setup_gpio() {
                                .active_level = 0,
                                },
     };
-    pinMode(SEL_BTN, INPUT_PULLUP);
+
+    button_config_t bt3 = {
+        .type = BUTTON_TYPE_GPIO,
+        .long_press_time = 600,
+        .short_press_time = 120,
+        .gpio_button_config = {
+                               .gpio_num = SEL_BTN,
+                               .active_level = 0,
+                               },
+    };
+
 
     btn1 = new Button(bt1);
 
@@ -92,6 +105,10 @@ void _setup_gpio() {
     btn2->attachSingleClickEventCb(&onButtonSingleClickCb2, NULL);
     btn2->attachDoubleClickEventCb(&onButtonDoubleClickCb2, NULL);
     btn2->attachLongPressStartEventCb(&onButtonHoldCb2, NULL);
+
+    pinMode(SEL_BTN, INPUT_PULLUP);
+    btn3 = new Button(bt3);
+    btn3->attachSingleClickEventCb(&onButtonSingleClickCb3, NULL);
 
     // setup POWER pin required by the vendor
     pinMode(PIN_POWER_ON, OUTPUT);
@@ -193,7 +210,6 @@ void InputHandler(void) {
             touchHeatMap(touchPoint);
         }
 #endif
-        if(digitalRead(SEL_BTN) == BTN_ACT) { selPressed=true; btn_pressed=true; }
         if (btn_pressed) {
             btn_pressed = false;
             if (!wakeUpScreen()) AnyKeyPress = true;
